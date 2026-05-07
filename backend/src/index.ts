@@ -3,6 +3,7 @@ import cors from "cors";
 import path from "path";
 import { config } from "./config";
 import { initializeDatabase } from "./db/schema";
+import db from "./db/index";
 import chatRouter from "./routes/chat";
 import documentsRouter from "./routes/documents";
 
@@ -18,9 +19,23 @@ initializeDatabase();
 // Routes
 app.use("/api/chat", chatRouter);
 app.use("/api/documents", documentsRouter);
-app.use("/api/conversations", (req, res) => {
-    // TODO: Implement in Phase 3
-    res.status(501).json({ error: "Not implemented yet" });
+app.use("/api/conversations", (_req, res) => {
+    const conversations = db
+        .prepare(
+            `SELECT conversation_id, 
+                    MIN(created_at) as started_at,
+                    MAX(created_at) as last_message_at,
+                    COUNT(*) as message_count,
+                    (SELECT content FROM chat_messages cm2 
+                     WHERE cm2.conversation_id = cm.conversation_id 
+                     AND cm2.role = 'user' 
+                     ORDER BY cm2.created_at ASC LIMIT 1) as title
+             FROM chat_messages cm
+             GROUP BY conversation_id
+             ORDER BY last_message_at DESC`,
+        )
+        .all();
+    res.json(conversations);
 });
 
 // Health check
