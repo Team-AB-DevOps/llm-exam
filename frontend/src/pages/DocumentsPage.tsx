@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { UploadArea } from "@/components/documents/UploadArea";
 import { DocumentList } from "@/components/documents/DocumentList";
 import { DocumentPreview } from "@/components/documents/DocumentPreview";
@@ -8,6 +8,7 @@ import type { Document } from "@/types";
 export function DocumentsPage() {
     const [documents, setDocuments] = useState<Document[]>([]);
     const [previewDoc, setPreviewDoc] = useState<Document | null>(null);
+    const initialized = useRef(false);
 
     const fetchDocuments = useCallback(async () => {
         try {
@@ -19,7 +20,10 @@ export function DocumentsPage() {
     }, []);
 
     useEffect(() => {
-        fetchDocuments();
+        if (!initialized.current) {
+            initialized.current = true;
+            fetchDocuments();
+        }
     }, [fetchDocuments]);
 
     // Poll for processing documents
