@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
 import { ChatPage } from "@/pages/ChatPage";
 import { DocumentsPage } from "@/pages/DocumentsPage";
+import { Toaster } from "@/components/ui/sonner";
 
 function App() {
     return (
@@ -16,6 +17,7 @@ function App() {
                     </Routes>
                 </main>
             </div>
+            <Toaster />
         </BrowserRouter>
     );
 }

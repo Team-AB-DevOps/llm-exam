@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Upload } from "lucide-react";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 interface UploadAreaProps {
     onUploadComplete: () => void;
@@ -16,6 +17,7 @@ export function UploadArea({ onUploadComplete }: UploadAreaProps) {
         async (file: File) => {
             if (file.type !== "application/pdf") {
                 setProgress("Only PDF files are supported.");
+                toast.error("Only PDF files are supported.");
                 return;
             }
 
@@ -25,9 +27,11 @@ export function UploadArea({ onUploadComplete }: UploadAreaProps) {
             try {
                 await api.uploadDocument(file);
                 setProgress(`${file.name} uploaded successfully.`);
+                toast.success(`${file.name} uploaded successfully.`);
                 onUploadComplete();
             } catch {
                 setProgress("Upload failed. Please try again.");
+                toast.error("Upload failed. Please try again.");
             } finally {
                 setIsUploading(false);
             }

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { ChatMessage } from "@/components/chat/ChatMessage";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 import type { ChatMessage as ChatMessageType, Conversation } from "@/types";
 import { MessageSquare, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,7 @@ export function ChatPage() {
             const convos = await api.getConversations();
             setConversations(convos);
         } catch {
-            console.error("Failed to fetch conversations");
+            toast.error("Failed to load conversations.");
         }
     }, []);
 
@@ -55,7 +56,7 @@ export function ChatPage() {
                 })),
             );
         } catch {
-            console.error("Failed to load conversation");
+            toast.error("Failed to load conversation.");
         }
     };
 
@@ -130,6 +131,7 @@ export function ChatPage() {
 
             fetchConversations();
         } catch {
+            toast.error("Failed to get a response. Please try again.");
             setMessages((prev) => {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
@@ -160,13 +162,15 @@ export function ChatPage() {
                     <div className="flex-1 overflow-y-auto p-2 space-y-1">
                         {conversations.map((conv) => (
                             <button
-                                key={conv.id}
-                                onClick={() => loadConversation(conv.id)}
+                                key={conv.conversation_id}
+                                onClick={() => loadConversation(conv.conversation_id)}
                                 className={`w-full text-left px-3 py-2 rounded-md text-sm truncate transition-colors ${
-                                    conv.id === conversationId ? "bg-secondary text-secondary-foreground" : "text-muted-foreground hover:bg-secondary/50"
+                                    conv.conversation_id === conversationId
+                                        ? "bg-secondary text-secondary-foreground"
+                                        : "text-muted-foreground hover:bg-secondary/50"
                                 }`}
                             >
-                                {conv.last_message || "New conversation"}
+                                {conv.title || "New conversation"}
                             </button>
                         ))}
                     </div>

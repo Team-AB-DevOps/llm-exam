@@ -16,7 +16,9 @@ export interface ChatMessage {
 }
 
 export interface Conversation {
-    id: string;
-    created_at: string;
-    last_message?: string;
+    conversation_id: string;
+    started_at: string;
+    last_message_at: string;
+    message_count: number;
+    title?: string;
 }
