@@ -48,7 +48,12 @@ export async function addDocumentChunks(documentId: string, chunks: string[]): P
     });
 }
 
-export async function queryRelevantChunks(query: string, topK: number = 5): Promise<string[]> {
+export interface RetrievedChunk {
+    content: string;
+    documentId: string;
+}
+
+export async function queryRelevantChunks(query: string, topK: number = 5): Promise<RetrievedChunk[]> {
     console.log(`[vectorStore] Querying top-${topK} chunks for: "${query.substring(0, 80)}${query.length > 80 ? "..." : ""}"`);
     const col = await getCollection();
     const queryEmbedding = await embeddings.embedQuery(query);
@@ -58,9 +63,22 @@ export async function queryRelevantChunks(query: string, topK: number = 5): Prom
         nResults: topK,
     });
 
-    const docs = (results.documents?.[0] ?? []).filter((doc): doc is string => doc !== null);
-    console.log(`[vectorStore] Retrieved ${docs.length} relevant chunk(s)`);
-    return docs;
+    const docs = results.documents?.[0] ?? [];
+    const metas = results.metadatas?.[0] ?? [];
+
+    const chunks: RetrievedChunk[] = [];
+    for (let i = 0; i < docs.length; i++) {
+        const content = docs[i];
+        const meta = metas[i];
+        if (content) {
+            chunks.push({
+                content,
+                documentId: (meta?.documentId as string) ?? "unknown",
+            });
+        }
+    }
+    console.log(`[vectorStore] Retrieved ${chunks.length} relevant chunk(s)`);
+    return chunks;
 }
 
 export async function deleteDocumentChunks(documentId: string): Promise<void> {
