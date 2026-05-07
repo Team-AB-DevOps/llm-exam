@@ -200,7 +200,12 @@ export function ChatPage() {
                     ) : (
                         <div className="py-4">
                             {messages.map((msg, i) => (
-                                <ChatMessage key={i} role={msg.role} content={msg.content} />
+                                <ChatMessage
+                                    key={i}
+                                    role={msg.role}
+                                    content={msg.content}
+                                    isStreaming={isStreaming && i === messages.length - 1 && msg.role === "assistant"}
+                                />
                             ))}
                             <div ref={messagesEndRef} />
                         </div>
