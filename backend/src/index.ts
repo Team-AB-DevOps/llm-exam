@@ -13,8 +13,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Request logging middleware
+app.use((req, _res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+    next();
+});
+
 // Initialize database
+console.log("[startup] Initializing database...");
 initializeDatabase();
+console.log("[startup] Database initialized");
 
 // Routes
 app.use("/api/chat", chatRouter);
@@ -44,7 +52,10 @@ app.get("/api/health", (req, res) => {
 });
 
 app.listen(config.port, () => {
-    console.log(`Backend server running on http://localhost:${config.port}`);
+    console.log(`[startup] Backend server running on http://localhost:${config.port}`);
+    console.log(`[startup] Ollama URL: ${config.ollamaBaseUrl}`);
+    console.log(`[startup] ChromaDB URL: ${config.chromaUrl}`);
+    console.log(`[startup] LLM model: ${config.llmModel}, Embedding model: ${config.embeddingModel}`);
 });
 
 export default app;

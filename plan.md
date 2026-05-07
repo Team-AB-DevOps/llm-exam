@@ -2,13 +2,13 @@
 
 ## TL;DR
 
-Build a two-app system (React frontend + Express backend) that lets HR users upload PDF documents, processes them into a ChromaDB vector store via Ollama embeddings, and provides a RAG-powered chatbot using LangGraph.js to answer questions grounded in those documents. Local Ollama llama3 model handles all generation.
+Build a two-app system (React frontend + Express backend) that lets HR users upload PDF documents, processes them into a ChromaDB vector store via Ollama embeddings, and provides a RAG-powered chatbot using LangGraph.js to answer questions grounded in those documents. Local Ollama llama3:8b model handles all generation.
 
 ## Tech Stack
 
 - **Frontend**: React + TypeScript + Vite + Tailwind CSS + shadcn/ui
 - **Backend**: Node.js + TypeScript + Express
-- **LLM**: Ollama — llama3 (8B) for generation, nomic-embed-text for embeddings
+- **LLM**: Ollama — llama3:8b for generation, nomic-embed-text for embeddings
 - **Vector Store**: ChromaDB (Docker container)
 - **Orchestration**: LangGraph.js (with LangChain.js components)
 - **Persistence**: SQLite (via better-sqlite3) for chat history + document metadata
@@ -104,7 +104,7 @@ Build a two-app system (React frontend + Express backend) that lets HR users upl
 
 10. **LangGraph RAG state graph** with nodes:
     - **retrieve**: Query ChromaDB with user question → return top-k relevant chunks
-    - **generate**: Construct prompt with 4T's design + retrieved context → call Ollama llama3 → stream response
+    - **generate**: Construct prompt with 4T's design + retrieved context → call Ollama llama3:8b → stream response
 
     Graph: `START → retrieve → generate → END`
 
@@ -208,4 +208,5 @@ Build a two-app system (React frontend + Express backend) that lets HR users upl
 
 1. **Conversation context**: Should previous messages in a conversation be included in the LLM prompt for multi-turn context? Recommend yes (last N messages) for a natural chat experience.
 2. **Chunk size**: Default to 1000 characters with 200 overlap for `RecursiveCharacterTextSplitter` — standard for RAG. Can be tuned later.
-3. **Top-k retrieval**: Default to 4 retrieved chunks. Balances context quality vs. token budget for llama3 8B.
+3. **Top-k retrieval**: Default to 4 retrieved chunks. Balances context quality vs. token budget for llama3:8b 8B.
+

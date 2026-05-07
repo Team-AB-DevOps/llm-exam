@@ -15,7 +15,7 @@ services:
     environment:
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
       - CHROMA_URL=http://chromadb:8000
-      - LLM_MODEL=llama3
+      - LLM_MODEL=llama3:8b
       - EMBEDDING_MODEL=nomic-embed-text
       - CHROMA_COLLECTION=hr_documents
     volumes:

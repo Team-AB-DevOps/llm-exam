@@ -36,7 +36,9 @@ const GraphState = Annotation.Root({
 
 // Retrieve node: query ChromaDB for relevant chunks
 async function retrieve(state: typeof GraphState.State) {
+    console.log(`[rag] Retrieve node — querying for: "${state.question.substring(0, 80)}${state.question.length > 80 ? "..." : ""}"`);
     const chunks = await queryRelevantChunks(state.question, 4);
+    console.log(`[rag] Retrieved ${chunks.length} context chunk(s)`);
     return { context: chunks };
 }
 
@@ -74,19 +76,25 @@ export async function runRAGPipeline(question: string, chatHistory: BaseMessage[
 }
 
 export async function* streamRAGPipeline(question: string, chatHistory: BaseMessage[] = []): AsyncGenerator<string> {
+    console.log(`[rag] Stream pipeline started — question: "${question.substring(0, 80)}${question.length > 80 ? "..." : ""}"`);
     // First retrieve context
     const chunks = await queryRelevantChunks(question, 4);
+    console.log(`[rag] Retrieved ${chunks.length} context chunk(s) for streaming`);
     const contextText = chunks.length > 0 ? chunks.map((chunk, i) => `[Document ${i + 1}]\n${chunk}`).join("\n\n") : "No relevant documents found.";
 
     const messages: BaseMessage[] = [new SystemMessage(SYSTEM_PROMPT), ...chatHistory, new HumanMessage(`Context:\n${contextText}\n\nQuestion: ${question}`)];
 
+    console.log(`[rag] Calling Ollama (${config.llmModel}) with ${messages.length} messages...`);
     const stream = await llm.stream(messages);
+    let tokenCount = 0;
     for await (const chunk of stream) {
         const content = typeof chunk.content === "string" ? chunk.content : "";
         if (content) {
+            tokenCount++;
             yield content;
         }
     }
+    console.log(`[rag] Stream complete — ${tokenCount} token chunks yielded`);
 }
 
 export { HumanMessage, AIMessage };

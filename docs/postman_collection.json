@@ -1,0 +1,178 @@
+{
+    "info": {
+        "name": "HR Document Chatbot API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": "API collection for the HR Document Chatbot backend"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3001"
+        },
+        {
+            "key": "documentId",
+            "value": ""
+        },
+        {
+            "key": "conversationId",
+            "value": ""
+        }
+    ],
+    "item": [
+        {
+            "name": "Health",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/health"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Documents",
+            "item": [
+                {
+                    "name": "Upload Document",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.collectionVariables.set('documentId', json.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/api/documents",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "",
+                                    "description": "Select a PDF file to upload"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List Documents",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/documents"
+                    }
+                },
+                {
+                    "name": "Get Document File",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/documents/{{documentId}}/file",
+                        "description": "Returns the raw PDF file. Set documentId variable first."
+                    }
+                },
+                {
+                    "name": "Delete Document",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/documents/{{documentId}}",
+                        "description": "Deletes document from DB, ChromaDB, and disk. Set documentId variable first."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Chat",
+            "item": [
+                {
+                    "name": "Send Message (New Conversation)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "// SSE response — extract conversationId from first event if possible",
+                                    "var body = pm.response.text();",
+                                    "var lines = body.split('\\n');",
+                                    "for (var i = 0; i < lines.length; i++) {",
+                                    "    if (lines[i].startsWith('data: ')) {",
+                                    "        try {",
+                                    "            var parsed = JSON.parse(lines[i].substring(6));",
+                                    "            if (parsed.type === 'meta' && parsed.conversationId) {",
+                                    "                pm.collectionVariables.set('conversationId', parsed.conversationId);",
+                                    "                break;",
+                                    "            }",
+                                    "        } catch(e) {}",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/api/chat",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"message\": \"What policies do you have about vacation?\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Send Message (Existing Conversation)",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/api/chat",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"message\": \"Can you tell me more about that?\",\n    \"conversationId\": \"{{conversationId}}\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Conversation History",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/chat/{{conversationId}}",
+                        "description": "Returns all messages for a conversation. Set conversationId variable first."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Conversations",
+            "item": [
+                {
+                    "name": "List Conversations",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/conversations"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -16,7 +16,11 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     const conversationId = existingConvId || uuidv4();
+    const isNewConversation = !existingConvId;
     const userMessageId = uuidv4();
+
+    console.log(`[chat] ${isNewConversation ? "New conversation" : "Continuing conversation"} ${conversationId}`);
+    console.log(`[chat] User message: "${message.substring(0, 100)}${message.length > 100 ? "..." : ""}"`);
 
     // Save user message
     db.prepare("INSERT INTO chat_messages (id, conversation_id, role, content) VALUES (?, ?, ?, ?)").run(userMessageId, conversationId, "user", message);
@@ -32,6 +36,8 @@ router.post("/", async (req: Request, res: Response) => {
     const chatHistory: BaseMessage[] = historyRows
         .slice(0, -1) // exclude last (current user message)
         .map((row) => (row.role === "user" ? new HumanMessage(row.content) : new AIMessage(row.content)));
+
+    console.log(`[chat] Chat history: ${chatHistory.length} previous message(s)`);
 
     // Set up SSE
     res.setHeader("Content-Type", "text/event-stream");
@@ -59,9 +65,10 @@ router.post("/", async (req: Request, res: Response) => {
             fullResponse,
         );
 
+        console.log(`[chat] Response complete for ${conversationId} (${fullResponse.length} chars)`);
         res.write(`data: ${JSON.stringify({ type: "done" })}\n\n`);
     } catch (error) {
-        console.error("Streaming error:", error);
+        console.error(`[chat] Streaming error for ${conversationId}:`, error);
         res.write(`data: ${JSON.stringify({ type: "error", content: "An error occurred while generating the response." })}\n\n`);
     }
 
