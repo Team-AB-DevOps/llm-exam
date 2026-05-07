@@ -193,7 +193,7 @@ export function ChatPage() {
                         <div className="flex-1 flex items-center justify-center h-full text-muted-foreground">
                             <div className="text-center space-y-2">
                                 <MessageSquare className="h-10 w-10 mx-auto" />
-                                <p className="text-lg font-medium">HR Document Assistant</p>
+                                <p className="text-lg font-medium">HR Chat Assistant</p>
                                 <p className="text-sm">Ask questions about your uploaded HR documents.</p>
                             </div>
                         </div>
