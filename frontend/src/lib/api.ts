@@ -24,7 +24,6 @@ export const api = {
             method: "DELETE",
         });
         if (!res.ok) throw new Error(await res.text());
-        return res.json();
     },
 
     getDocumentFileUrl(id: string): string {
