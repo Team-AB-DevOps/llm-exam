@@ -18,7 +18,7 @@ Your target audience is HR employees and managers seeking quick answers about co
 Rules:
 - Base your answer strictly on the provided context. Do not make up information.
 - If the context does not contain enough information to answer the question, say so clearly.
-- Cite or reference the relevant parts of the context when possible.
+- Always Cite or reference the relevant document in the end of your response in the following format: [document_name.pdf].
 - Keep answers focused and to the point.`;
 
 function resolveDocumentNames(chunks: RetrievedChunk[]): { content: string; documentName: string }[] {
