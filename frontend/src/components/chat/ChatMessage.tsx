@@ -1,6 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { User, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+function formatContent(text: string): ReactNode[] {
+    const parts = text.split(/(\[[^\]]+\.pdf\])/gi);
+    return parts.map((part, i) => (/^\[[^\]]+\.pdf\]$/i.test(part) ? <strong key={i}>{part}</strong> : <span key={i}>{part}</span>));
+}
 
 interface ChatMessageProps {
     role: "user" | "assistant";
@@ -44,8 +49,8 @@ export function ChatMessage({ role, content, isStreaming }: ChatMessageProps) {
                     </span>
                 ) : (
                     <>
-                        {stableContent}
-                        {newContent && <span className="animate-streaming">{newContent}</span>}
+                        {formatContent(stableContent)}
+                        {newContent && <span className="animate-streaming">{formatContent(newContent)}</span>}
                     </>
                 )}
             </div>
